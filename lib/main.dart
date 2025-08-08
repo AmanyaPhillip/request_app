@@ -4,8 +4,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:io';
 
-// REMOVED: part 'main.g.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
@@ -65,7 +63,7 @@ class RequestRecord extends HiveObject {
   });
 }
 
-// Manual TypeAdapter for RequestRecord
+// Hive Adapter for RequestRecord
 class RequestRecordAdapter extends TypeAdapter<RequestRecord> {
   @override
   final int typeId = 0;
@@ -164,7 +162,6 @@ class LuxoRequestsApp extends StatelessWidget {
             ),
           ),
         ),
-        // FIX 2: Corrected CardTheme to CardThemeData
         cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
@@ -209,9 +206,11 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _checkFirstTime() async {
     final prefs = await SharedPreferences.getInstance();
     final hasCompletedSetup = prefs.getBool('setup_completed') ?? false;
-    setState(() {
-      _isFirstTime = !hasCompletedSetup;
-    });
+    if (mounted) {
+      setState(() {
+        _isFirstTime = !hasCompletedSetup;
+      });
+    }
   }
 
   @override
@@ -288,7 +287,7 @@ class _SetupScreenState extends State<SetupScreen> {
     'Building B',
     'Building C',
     'Other',
-  ]; // This would normally be scraped from the website
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -528,15 +527,17 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _titleController.text = prefs.getString('title') ?? '';
-      _firstNameController.text = prefs.getString('firstName') ?? '';
-      _lastNameController.text = prefs.getString('lastName') ?? '';
-      _phoneController.text = prefs.getString('phone') ?? '';
-      _emailController.text = prefs.getString('email') ?? '';
-      _selectedProject = prefs.getString('project');
-      _unitNumberController.text = prefs.getString('unitNumber') ?? '';
-    });
+    if (mounted) {
+      setState(() {
+        _titleController.text = prefs.getString('title') ?? '';
+        _firstNameController.text = prefs.getString('firstName') ?? '';
+        _lastNameController.text = prefs.getString('lastName') ?? '';
+        _phoneController.text = prefs.getString('phone') ?? '';
+        _emailController.text = prefs.getString('email') ?? '';
+        _selectedProject = prefs.getString('project');
+        _unitNumberController.text = prefs.getString('unitNumber') ?? '';
+      });
+    }
   }
 
   @override
@@ -785,8 +786,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       case 'Cleaning': return Icons.cleaning_services;
       case 'Maintenance': return Icons.build;
       case 'Painting': return Icons.format_paint;
-      // FIX 3: Replaced Icons.carpet with Icons.layers
-      case 'Flooring': return Icons.layers;
+      case 'Flooring': return Icons.layers; // Corrected icon
       case 'Appliance Repair': return Icons.kitchen;
       case 'Pest Control': return Icons.bug_report;
       case 'Security': return Icons.security;
@@ -903,10 +903,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     });
 
     try {
-      // Simulate form submission with WebView automation
       final success = await _simulateFormSubmission();
       
-      // Save to history
       final box = Hive.box<RequestRecord>('requests');
       final request = RequestRecord(
         title: _titleController.text,
@@ -936,12 +934,11 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       }
       
       if (success) {
-        // Clear form
         setState(() {
           _selectedServices.clear();
           _selectedImage = null;
         });
-        _loadUserData(); // Reload default values
+        _loadUserData();
       }
     } catch (e) {
       if (mounted) {
@@ -953,7 +950,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
         );
       }
     } finally {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           _isSubmitting = false;
         });
@@ -962,10 +959,8 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   }
 
   Future<bool> _simulateFormSubmission() async {
-    // In a real implementation, this would use WebView to automate the form
-    // For now, we'll simulate with a delay and random success/failure
     await Future.delayed(const Duration(seconds: 2));
-    return DateTime.now().millisecondsSinceEpoch % 2 == 0; // Random success/failure
+    return DateTime.now().millisecondsSinceEpoch % 2 == 0;
   }
 
   @override
@@ -1328,8 +1323,7 @@ class RequestDetailScreen extends StatelessWidget {
       case 'Cleaning': return Icons.cleaning_services;
       case 'Maintenance': return Icons.build;
       case 'Painting': return Icons.format_paint;
-      // FIX 3: Replaced Icons.carpet with Icons.layers
-      case 'Flooring': return Icons.layers;
+      case 'Flooring': return Icons.layers; // Corrected icon
       case 'Appliance Repair': return Icons.kitchen;
       case 'Pest Control': return Icons.bug_report;
       case 'Security': return Icons.security;
@@ -1378,16 +1372,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _titleController.text = prefs.getString('title') ?? '';
-      _firstNameController.text = prefs.getString('firstName') ?? '';
-      _lastNameController.text = prefs.getString('lastName') ?? '';
-      _phoneController.text = prefs.getString('phone') ?? '';
-      _emailController.text = prefs.getString('email') ?? '';
-      _selectedProject = prefs.getString('project');
-      _unitNumberController.text = prefs.getString('unitNumber') ?? '';
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _titleController.text = prefs.getString('title') ?? '';
+        _firstNameController.text = prefs.getString('firstName') ?? '';
+        _lastNameController.text = prefs.getString('lastName') ?? '';
+        _phoneController.text = prefs.getString('phone') ?? '';
+        _emailController.text = prefs.getString('email') ?? '';
+        _selectedProject = prefs.getString('project');
+        _unitNumberController.text = prefs.getString('unitNumber') ?? '';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
