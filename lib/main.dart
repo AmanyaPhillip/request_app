@@ -279,15 +279,20 @@ class _SetupScreenState extends State<SetupScreen> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _unitNumberController = TextEditingController();
-
+  String? _selectedTitle;
   String? _selectedProject;
   final List<String> _projects = [
-    'LUXO Place - Tower U',
-    'Building A',
-    'Building B',
-    'Building C',
-    'Other',
-  ];
+  'La Suite',
+  'L\'Aristocrate',
+  'Domaine des Méandres',
+  'Villas Cortina',
+  'Le Divin',
+  'Le WOW',
+  'Le 696 St-Jean',
+  '550 St-Jean (Stationnement)',
+  'LUXO',
+  'Frontenac',
+];
 
   @override
   Widget build(BuildContext context) {
@@ -320,15 +325,25 @@ class _SetupScreenState extends State<SetupScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              TextFormField(
-                controller: _titleController,
+              DropdownButtonFormField<String>(
+                value: _selectedTitle,
                 decoration: const InputDecoration(
                   labelText: 'Title',
-                  hintText: 'Mr., Ms., Dr., etc.',
                 ),
+                items: ['Mr.', 'Mrs.'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedTitle = newValue;
+                  });
+                },
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your title';
+                  if (value == null) {
+                    return 'Please select your title';
                   }
                   return null;
                 },
@@ -515,7 +530,9 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     'Security',
   ];
 
-  final Set<String> _selectedServices = {};
+  //final Set<String> _selectedServices = {};
+  String? _selectedService; // Can be null if nothing is selected
+  String? _selectedTitle;
   File? _selectedImage;
   bool _isSubmitting = false;
 
@@ -615,13 +632,30 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
           children: [
             Expanded(
               flex: 1,
-              child: TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                ),
-                validator: (value) => value?.isEmpty == true ? 'Required' : null,
-              ),
+              child: DropdownButtonFormField<String>(
+                          value: _selectedTitle,
+                          decoration: const InputDecoration(
+                            labelText: 'Title',
+                          ),
+                          items: ['Mr.', 'Mrs.'].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedTitle = newValue;
+                            });
+                          },
+                          validator: (value) {
+                            // This checks if a value has been selected.
+                            if (value == null) {
+                              return 'Required'; // Matching your original validator's message
+                            }
+                            return null;
+                          },
+                        ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -722,7 +756,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
           itemCount: _availableServices.length,
           itemBuilder: (context, index) {
             final service = _availableServices[index];
-            final isSelected = _selectedServices.contains(service);
+            final isSelected = _selectedService == service;
             
             return Card(
               color: isSelected ? const Color(0xFFD4AF37) : Colors.white,
@@ -730,9 +764,9 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                 onTap: () {
                   setState(() {
                     if (isSelected) {
-                      _selectedServices.remove(service);
+                      _selectedService = null;
                     } else {
-                      _selectedServices.add(service);
+                      _selectedService = service;
                     }
                   });
                 },
@@ -763,11 +797,11 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
             );
           },
         ),
-        if (_selectedServices.isEmpty)
+        if (_selectedService == null)
           const Padding(
             padding: EdgeInsets.only(top: 8),
             child: Text(
-              'Please select at least one service',
+              'Please select one service',
               style: TextStyle(
                 color: Colors.red,
                 fontSize: 12,
@@ -888,10 +922,10 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   Future<void> _submitRequest() async {
     if (!_formKey.currentState!.validate()) return;
     
-    if (_selectedServices.isEmpty) {
+    if (_selectedService == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select at least one service'),
+          content: Text('Please select one service'),
           backgroundColor: Colors.red,
         ),
       );
@@ -914,7 +948,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
         email: _emailController.text,
         project: _selectedProject!,
         unitNumber: _unitNumberController.text,
-        services: _selectedServices.toList(),
+        services: _selectedService.text,
         submissionDate: DateTime.now(),
         status: success ? 'Success' : 'Failed',
         imagePath: _selectedImage?.path,
@@ -935,7 +969,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
       
       if (success) {
         setState(() {
-          _selectedServices.clear();
+          _selectedService = null;
           _selectedImage = null;
         });
         _loadUserData();
