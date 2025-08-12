@@ -467,7 +467,7 @@ class _SetupScreenState extends State<SetupScreen> {
     if (_formKey.currentState!.validate()) {
       final prefs = await SharedPreferences.getInstance();
       
-      await prefs.setString('title', _titleController.text);
+      await prefs.setString('title', _selectedTitle!);
       await prefs.setString('firstName', _firstNameController.text);
       await prefs.setString('lastName', _lastNameController.text);
       await prefs.setString('phone', _phoneController.text);
@@ -482,7 +482,6 @@ class _SetupScreenState extends State<SetupScreen> {
 
   @override
   void dispose() {
-    _titleController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
@@ -501,7 +500,6 @@ class NewRequestScreen extends StatefulWidget {
 
 class _NewRequestScreenState extends State<NewRequestScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -509,13 +507,18 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
   final _unitNumberController = TextEditingController();
 
   String? _selectedProject;
-  final List<String> _projects = [
-    'LUXO Place - Tower U',
-    'Building A',
-    'Building B',
-    'Building C',
-    'Other',
-  ];
+final List<String> _projects = [
+  'La Suite',
+  'L\'Aristocrate',
+  'Domaine des Méandres',
+  'Villas Cortina',
+  'Le Divin',
+  'Le WOW',
+  'Le 696 St-Jean',
+  '550 St-Jean (Stationnement)',
+  'LUXO',
+  'Frontenac',
+];
 
   final List<String> _availableServices = [
     'Plumbing',
@@ -546,7 +549,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
-        _titleController.text = prefs.getString('title') ?? '';
+        _selectedTitle = prefs.getString('title');
         _firstNameController.text = prefs.getString('firstName') ?? '';
         _lastNameController.text = prefs.getString('lastName') ?? '';
         _phoneController.text = prefs.getString('phone') ?? '';
@@ -948,7 +951,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
         email: _emailController.text,
         project: _selectedProject!,
         unitNumber: _unitNumberController.text,
-        services: _selectedService.text,
+        services: [_selectedService!],
         submissionDate: DateTime.now(),
         status: success ? 'Success' : 'Failed',
         imagePath: _selectedImage?.path,
@@ -999,7 +1002,6 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
 
   @override
   void dispose() {
-    _titleController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
@@ -1379,7 +1381,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -1387,13 +1388,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _unitNumberController = TextEditingController();
 
   String? _selectedProject;
-  final List<String> _projects = [
-    'LUXO Place - Tower U',
-    'Building A',
-    'Building B',
-    'Building C',
-    'Other',
-  ];
+  String? _selectedTitle;
+final List<String> _projects = [
+  'La Suite',
+  'L\'Aristocrate',
+  'Domaine des Méandres',
+  'Villas Cortina',
+  'Le Divin',
+  'Le WOW',
+  'Le 696 St-Jean',
+  '550 St-Jean (Stationnement)',
+  'LUXO',
+  'Frontenac',
+];
 
   bool _isLoading = true;
   bool _isSaving = false;
@@ -1408,7 +1415,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
-        _titleController.text = prefs.getString('title') ?? '';
+        _selectedTitle = prefs.getString('title');
         _firstNameController.text = prefs.getString('firstName') ?? '';
         _lastNameController.text = prefs.getString('lastName') ?? '';
         _phoneController.text = prefs.getString('phone') ?? '';
@@ -1482,15 +1489,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              TextFormField(
-                controller: _titleController,
+              DropdownButtonFormField<String>(
+                value: _selectedTitle,
                 decoration: const InputDecoration(
                   labelText: 'Title',
-                  hintText: 'Mr., Ms., Dr., etc.',
                 ),
+                items: ['Mr.', 'Mrs.'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedTitle = newValue;
+                  });
+                },
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your title';
+                  if (value == null) {
+                    return 'Please select your title';
                   }
                   return null;
                 },
@@ -1653,7 +1670,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       try {
         final prefs = await SharedPreferences.getInstance();
         
-        await prefs.setString('title', _titleController.text);
+        await prefs.setString('title', _selectedTitle!);
         await prefs.setString('firstName', _firstNameController.text);
         await prefs.setString('lastName', _lastNameController.text);
         await prefs.setString('phone', _phoneController.text);
@@ -1729,7 +1746,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
-    _titleController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
