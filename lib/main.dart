@@ -944,7 +944,7 @@ final List<String> _projects = [
       
       final box = Hive.box<RequestRecord>('requests');
       final request = RequestRecord(
-        title: _titleController.text,
+        title: _selectedTitle!,
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
         phone: _phoneController.text,
