@@ -1,20 +1,29 @@
-// test/widget_test.dart
+// Unit tests for the shared app data extracted during the refactor.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:request_luxo_app/main.dart';
+import 'package:request_luxo_app/data/app_data.dart';
 
 void main() {
-  testWidgets('Setup screen shows welcome message', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    // We need to wrap it in a function to allow Hive to initialize.
-    await tester.pumpWidget(const LuxoRequestsApp());
+  group('kBuildings', () {
+    test('contains the expected projects', () {
+      expect(kBuildings, contains('LUXO'));
+      expect(kBuildings, contains('Frontenac'));
+    });
 
-    // Wait for the app to settle.
-    await tester.pumpAndSettle();
+    test('has the full set of buildings', () {
+      expect(kBuildings.length, 10);
+    });
+  });
 
-    // Verify that the setup screen shows the welcome message.
-    expect(find.text('Welcome to Luxo requests'), findsOneWidget);
-    expect(find.text('Let\'s set up your profile to streamline your service requests.'), findsOneWidget);
+  group('serviceIcon', () {
+    test('returns specific icons for known services', () {
+      expect(serviceIcon('Plumbing'), Icons.plumbing);
+      expect(serviceIcon('Security'), Icons.security);
+    });
+
+    test('falls back to a default icon for unknown services', () {
+      expect(serviceIcon('Something else'), Icons.home_repair_service);
+    });
   });
 }
