@@ -22,12 +22,6 @@ dependencies:
   # Image Handling
   image_picker: ^1.1.2
 
-  # Web Automation
-  flutter_inappwebview: ^6.0.0
-
-  # HTTP Requests (for scraping if needed)
-  http: ^1.5.0
-
   # File handling
   path_provider: ^2.1.5
   
